@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background-color: #020504;
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+
+  /* 古风地府气魄书法标题字体 */
+  .font-underworld {
+    font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", "PingFang SC", serif;
+  }
+}
+
+/* 现代化平滑入场动效（遵循 Modern Web Guidance） */
+.animate-item-entry {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+  .animate-item-entry {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* 幽冥发光与鬼火特效 */
+.text-glow-ghost {
+  text-shadow: 0 0 12px rgba(13, 245, 177, 0.7), 0 0 24px rgba(13, 245, 177, 0.3);
+}
+
+.text-glow-cinnabar {
+  text-shadow: 0 0 12px rgba(255, 42, 75, 0.7), 0 0 24px rgba(255, 42, 75, 0.4);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 12px rgba(243, 202, 82, 0.6), 0 0 24px rgba(243, 202, 82, 0.3);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 12px rgba(157, 78, 221, 0.7), 0 0 24px rgba(157, 78, 221, 0.3);
+}
+
+/* 朱砂官方印章特效 (Cinnabar Netherworld Official Seal) */
+.seal-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border: 2px solid #ff2a4b;
+  border-radius: 4px;
+  color: #ff2a4b;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  transform: rotate(-3deg);
+  text-shadow: 0 0 6px rgba(255, 42, 75, 0.6);
+  box-shadow: inset 0 0 8px rgba(255, 42, 75, 0.2), 0 0 10px rgba(255, 42, 75, 0.25);
+  user-select: none;
+}
+
+.seal-stamp-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border: 2px solid #0df5b1;
+  border-radius: 4px;
+  color: #0df5b1;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  transform: rotate(2deg);
+  text-shadow: 0 0 6px rgba(13, 245, 177, 0.6);
+  box-shadow: inset 0 0 8px rgba(13, 245, 177, 0.2), 0 0 10px rgba(13, 245, 177, 0.25);
+  user-select: none;
+}
+
+/* 幽冥地府画卷/符箓框纹 */
+.talisman-box {
+  position: relative;
+  background: linear-gradient(180deg, rgba(14, 26, 21, 0.9) 0%, rgba(5, 10, 8, 0.95) 100%);
+  border: 1px solid rgba(13, 245, 177, 0.25);
+}
+
+.talisman-box::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(13, 245, 177, 0.1);
+  pointer-events: none;
+}
+
+/* 鬼火灯笼与环境光晕 */
+.ghost-ambient-bg {
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(13, 245, 177, 0.09) 0%, transparent 60%),
+    radial-gradient(ellipse at 15% 40%, rgba(255, 42, 75, 0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 60%, rgba(157, 78, 221, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #020504 0%, #050a08 50%, #020504 100%);
+}
+
+/* 幽冥生死簿细滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 10, 8, 0.95);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(13, 245, 177, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 245, 177, 0.6);
+}
+
