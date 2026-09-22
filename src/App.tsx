@@ -132,7 +132,10 @@ export const App: React.FC = () => {
     const realmLocations = getLocationsByRealm(targetRealm);
     const realmFamilies = getFamiliesByRealm(targetRealm);
     const loc = LifeSimulatorEngine.rollBirthLocation(realmLocations);
-    const fam = LifeSimulatorEngine.rollFamilyBackground(realmFamilies);
+    // 动物道的出生信息由物种承担，没有家庭背景候选项；保留最近有效背景，避免切换道途时写入空值。
+    const fam = targetRealm === 'animal'
+      ? currentFamily
+      : LifeSimulatorEngine.rollFamilyBackground(realmFamilies);
     const anim = LifeSimulatorEngine.rollAnimalSpecies();
     setCurrentLocation(loc);
     setCurrentFamily(fam);
@@ -227,13 +230,14 @@ export const App: React.FC = () => {
 
     if (res.achievementId && !unlockedThisRun.includes(res.achievementId)) {
       setUnlockedThisRun((prev) => [...prev, res.achievementId!]);
+      soundManager.playAchievementUnlock();
     }
 
     // 若触发了关键岔路口抉择，立刻暂停自动播放等待玩家决定
     if (res.pendingChoice) {
       setPendingChoice(res.pendingChoice);
       setIsAutoPlaying(false);
-      soundManager.playDanmakuPing();
+      soundManager.playChoicePrompt();
     }
 
     if (res.isDead) {
@@ -280,6 +284,7 @@ export const App: React.FC = () => {
 
     if (res.achievementId && !unlockedThisRun.includes(res.achievementId)) {
       setUnlockedThisRun((prev) => [...prev, res.achievementId!]);
+      soundManager.playAchievementUnlock();
     }
 
     if (res.isDead) {
@@ -387,6 +392,9 @@ export const App: React.FC = () => {
     setIsDead(true);
     setDeathReason(reason);
     setUnlockedThisRun(achievements);
+    if (achievements.length > unlockedThisRun.length) {
+      soundManager.playAchievementUnlock();
+    }
     soundManager.playDeathBell();
 
     const record = LifeSimulatorEngine.calculateSettlement(

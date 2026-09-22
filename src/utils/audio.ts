@@ -92,6 +92,87 @@ class SoundManager {
     } catch {}
   }
 
+  playRealmShift(realm: 'human' | 'animal' | 'fantasy') {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      const notes = realm === 'human'
+        ? [392, 523.25]
+        : realm === 'animal'
+        ? [293.66, 440]
+        : [659.25, 987.77];
+
+      notes.forEach((frequency, index) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const startAt = this.ctx.currentTime + index * 0.09;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(frequency, startAt);
+        gain.gain.setValueAtTime(0.1, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.28);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(startAt);
+        osc.stop(startAt + 0.28);
+      });
+    } catch {}
+  }
+
+  playChoicePrompt() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      [392, 466.16].forEach((frequency, index) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const startAt = this.ctx.currentTime + index * 0.14;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(frequency, startAt);
+        gain.gain.setValueAtTime(0.12, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(startAt);
+        osc.stop(startAt + 0.3);
+      });
+    } catch {}
+  }
+
+  playAchievementUnlock() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      [659.25, 783.99, 987.77].forEach((frequency, index) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const startAt = this.ctx.currentTime + index * 0.1;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(frequency, startAt);
+        gain.gain.setValueAtTime(0.14, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.4);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(startAt);
+        osc.stop(startAt + 0.4);
+      });
+    } catch {}
+  }
+
   playSlotTick() {
     if (!this.enabled) return;
     try {

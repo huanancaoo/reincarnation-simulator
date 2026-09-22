@@ -42,6 +42,15 @@ export const BirthSlotMachine: React.FC<BirthSlotMachineProps> = ({
   const eligibleLocations = allLocations.filter((l) => !l.realm || l.realm.includes(realm));
   const eligibleFamilies = allFamilies.filter((f) => !f.realm || f.realm.includes(realm));
 
+  const handleRealmSelect = (nextRealm: Realm) => {
+    if (nextRealm === realm) {
+      soundManager.playClick();
+    } else {
+      soundManager.playRealmShift(nextRealm);
+    }
+    onSelectRealm(nextRealm);
+  };
+
   // 模拟老虎机摇奖滚动动效
   const handleSpin = () => {
     if (isSpinning) return;
@@ -104,10 +113,7 @@ export const BirthSlotMachine: React.FC<BirthSlotMachineProps> = ({
       {/* 六道轮回道途切换器 */}
       <div className="flex justify-center items-center gap-2 sm:gap-3 mb-6">
         <button
-          onClick={() => {
-            soundManager.playClick();
-            onSelectRealm('human');
-          }}
+          onClick={() => handleRealmSelect('human')}
           className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-serif font-bold flex items-center gap-1.5 border-2 transition-all ${
             realm === 'human'
               ? 'bg-underworld-ghost/15 border-underworld-ghost text-underworld-ghost shadow-glow-ghost-sm'
@@ -119,10 +125,7 @@ export const BirthSlotMachine: React.FC<BirthSlotMachineProps> = ({
         </button>
 
         <button
-          onClick={() => {
-            soundManager.playClick();
-            onSelectRealm('animal');
-          }}
+          onClick={() => handleRealmSelect('animal')}
           className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-serif font-bold flex items-center gap-1.5 border-2 transition-all ${
             realm === 'animal'
               ? 'bg-underworld-gold/15 border-underworld-gold text-underworld-gold shadow-glow-gold'
@@ -134,10 +137,7 @@ export const BirthSlotMachine: React.FC<BirthSlotMachineProps> = ({
         </button>
 
         <button
-          onClick={() => {
-            soundManager.playClick();
-            onSelectRealm('fantasy');
-          }}
+          onClick={() => handleRealmSelect('fantasy')}
           className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-serif font-bold flex items-center gap-1.5 border-2 transition-all ${
             realm === 'fantasy'
               ? 'bg-purple-900/30 border-purple-400 text-purple-300 shadow-glow-purple ring-1 ring-purple-400/40'
