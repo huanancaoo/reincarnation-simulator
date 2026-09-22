@@ -350,7 +350,7 @@ export class LifeSimulatorEngine {
         age,
         text: eventText,
         statChanges,
-        isMilestone: isDead || !!chosenEvent?.effects?.achievementId || !!pendingChoice || age % 10 === 0
+        isMilestone: isDead || !!chosenEvent?.effects?.achievementId || !!pendingChoice
       },
       newStats,
       isDead,

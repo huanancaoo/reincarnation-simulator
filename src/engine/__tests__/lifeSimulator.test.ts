@@ -3,6 +3,7 @@ import { LifeSimulatorEngine } from '../lifeSimulator';
 import { TALENTS_POOL } from '../../data/talents';
 import { BIRTH_LOCATIONS, FAMILY_BACKGROUNDS, getLocationsByRealm, getFamiliesByRealm } from '../../data/locations';
 import { ANIMAL_SPECIES } from '../../data/animals';
+import { LIFE_EVENTS } from '../../data/events';
 import { Attributes, InteractiveChoice, Talent } from '../../types/game';
 
 describe('LifeSimulatorEngine', () => {
@@ -84,6 +85,30 @@ describe('LifeSimulatorEngine', () => {
     expect(year0.log.age).toBe(0);
     expect(year0.log.text).toBeTruthy();
     expect(year0.newStats.strength).toBeGreaterThanOrEqual(5);
+  });
+
+  it('should not mark an uneventful decade as a major fate event', () => {
+    const stats: Attributes = {
+      beauty: 5,
+      intelligence: 5,
+      strength: 5,
+      money: 5,
+      karma: 5,
+      luck: 5
+    };
+    const history = new Set(LIFE_EVENTS.map((event) => event.id));
+
+    const result = LifeSimulatorEngine.simulateYear(
+      40,
+      stats,
+      [],
+      BIRTH_LOCATIONS[0],
+      FAMILY_BACKGROUNDS[0],
+      history
+    );
+
+    expect(result.log.text).toContain('平平淡淡，安然度过了一岁春秋');
+    expect(result.log.isMilestone).toBe(false);
   });
 
   it('should support animal realm simulation and lifespan check', () => {

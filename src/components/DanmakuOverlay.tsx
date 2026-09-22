@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 interface DanmakuItem {
   id: number;
   text: string;
-  topPercent: number;
   color: string;
   speedSec: number;
 }
@@ -44,12 +43,12 @@ export const DanmakuOverlay: React.FC<DanmakuOverlayProps> = ({
   enabled,
   latestEventText
 }) => {
-  const [items, setItems] = useState<DanmakuItem[]>([]);
+  const [item, setItem] = useState<DanmakuItem | null>(null);
 
   // 定时随机发射弹幕
   useEffect(() => {
     if (!enabled) {
-      setItems([]);
+      setItem(null);
       return;
     }
 
@@ -58,13 +57,12 @@ export const DanmakuOverlay: React.FC<DanmakuOverlayProps> = ({
       const newItem: DanmakuItem = {
         id: Date.now() + Math.random(),
         text,
-        topPercent: 8 + Math.random() * 55, // 避免挡住底部控制器
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        speedSec: 7 + Math.random() * 4
+        speedSec: 4.8
       };
 
-      setItems((prev) => [...prev.slice(-12), newItem]);
-    }, 2400);
+      setItem(newItem);
+    }, 5200);
 
     return () => clearInterval(interval);
   }, [enabled]);
@@ -90,32 +88,31 @@ export const DanmakuOverlay: React.FC<DanmakuOverlayProps> = ({
       const reactionItem: DanmakuItem = {
         id: Date.now(),
         text: reactionText,
-        topPercent: 15 + Math.random() * 30,
         color: 'text-amber-400 font-extrabold',
-        speedSec: 6
+        speedSec: 4.8
       };
-      setItems((prev) => [...prev, reactionItem]);
+      setItem(reactionItem);
     }
   }, [enabled, latestEventText]);
 
   if (!enabled) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden">
-      {items.map((item) => (
+    <div className="fixed inset-x-0 top-3 h-7 pointer-events-none z-30 overflow-hidden" aria-live="polite">
+      {item && (
         <div
           key={item.id}
-          className={`absolute whitespace-nowrap text-xs sm:text-sm font-bold opacity-80 select-none ${item.color}`}
+          className={`absolute top-0 whitespace-nowrap text-xs sm:text-sm font-bold opacity-90 select-none ${item.color}`}
           style={{
-            top: `${item.topPercent}%`,
             right: '-100%',
             animation: `danmakuMove ${item.speedSec}s linear forwards`,
             textShadow: '0 1px 4px rgba(0,0,0,0.9)'
           }}
+          onAnimationEnd={() => setItem((current) => current?.id === item.id ? null : current)}
         >
           {item.text}
         </div>
-      ))}
+      )}
 
       <style>{`
         @keyframes danmakuMove {
@@ -123,7 +120,7 @@ export const DanmakuOverlay: React.FC<DanmakuOverlayProps> = ({
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-150vw);
+            transform: translateX(-160vw);
           }
         }
       `}</style>

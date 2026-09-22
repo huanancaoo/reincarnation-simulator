@@ -54,9 +54,10 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
   }, [logs.length, pendingChoice]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col h-[calc(100vh-70px)] p-2 sm:p-4">
+    <div className="w-full max-w-[1400px] mx-auto flex flex-col h-[calc(100vh-70px)] p-2 sm:p-4">
+      <div className="flex-1 min-h-0 flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_23rem]">
       {/* 顶部简明 HUD：生死簿实时监察法镜 */}
-      <div className="bg-underworld-900/95 border-2 border-underworld-700/80 rounded-xl p-3 mb-3 backdrop-blur-md shadow-diyu-panel relative overflow-hidden">
+      <div className="shrink-0 bg-underworld-900/95 border-2 border-underworld-700/80 rounded-xl p-3 backdrop-blur-md shadow-diyu-panel relative overflow-hidden lg:order-2 lg:h-full lg:overflow-y-auto lg:p-4 custom-scrollbar">
         {/* 顶部装饰暗纹 */}
         <div className="flex items-center justify-between border-b border-underworld-800/80 pb-2 mb-2 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
@@ -102,7 +103,7 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
         )}
 
         {/* 动态六维资质栏 */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-center">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-center lg:grid-cols-2 lg:gap-2">
           <AttributeWidget icon={<Sparkles className="w-3 h-3 text-pink-400" />} label="骨相皮囊" value={attributes.beauty} />
           <AttributeWidget icon={<Brain className="w-3 h-3 text-cyan-400" />} label="宿慧悟性" value={attributes.intelligence} />
           <AttributeWidget icon={<Dumbbell className="w-3 h-3 text-emerald-400" />} label="气血根骨" value={attributes.strength} />
@@ -112,8 +113,9 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
         </div>
       </div>
 
+      <div className="flex flex-1 min-h-0 flex-col gap-3 lg:order-1">
       {/* 核心演进事件流区域（带滚动容器） */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 rounded-xl bg-underworld-950/90 border-2 border-underworld-800/80 p-3 sm:p-4 relative backdrop-blur-md shadow-inner custom-scrollbar">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2.5 rounded-xl bg-underworld-950/90 border-2 border-underworld-800/80 p-3 sm:p-4 relative backdrop-blur-md shadow-inner custom-scrollbar">
         {logs.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs sm:text-sm font-serif space-y-2">
             <span className="text-3xl animate-bounce">📜</span>
@@ -123,7 +125,7 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
         ) : (
           logs.map((log, index) => {
             const isLatest = index === logs.length - 1;
-            const isMilestone = log.isMilestone || log.age % 10 === 0;
+            const isMilestone = log.isMilestone;
 
             return (
               <div
@@ -256,7 +258,7 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
       </div>
 
       {/* 底部控制台（幽冥轮转控制台） */}
-      <div className="bg-underworld-900/95 border-2 border-underworld-700/80 rounded-xl p-3 mt-3 backdrop-blur-md flex flex-wrap items-center justify-between gap-2 shadow-diyu-panel talisman-box">
+      <div className="shrink-0 bg-underworld-900/95 border-2 border-underworld-700/80 rounded-xl p-3 backdrop-blur-md flex flex-wrap items-center justify-between gap-2 shadow-diyu-panel talisman-box">
         {/* 速度控制 */}
         <div className="flex items-center gap-1.5 text-xs font-serif">
           <span className="text-slate-400 mr-1 text-[11px] hidden sm:inline">推演步速:</span>
@@ -351,6 +353,8 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
             </button>
           )}
         </div>
+      </div>
+      </div>
       </div>
     </div>
   );
