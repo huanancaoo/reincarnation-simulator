@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { AnimalSpecies, Attributes, BirthLocation, FamilyBackground, GamePhase, GameRecord, InteractiveChoice, PlayerProfile, Realm, Talent, YearLog } from './types/game';
 import { TALENTS_POOL } from './data/talents';
 import {
@@ -421,6 +421,15 @@ export const App: React.FC = () => {
       }
     };
   }, [phase, isAutoPlaying, isDead, currentAge, speedMs, pendingChoice]);
+
+  useLayoutEffect(() => {
+    // 等待浏览器完成点击焦点带来的滚动锚定后再回顶，避免新步骤停留在上一页的滚动位置。
+    const frameId = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [phase]);
 
   return (
     <div className="min-h-screen flex flex-col ghost-ambient-bg text-slate-100 selection:bg-underworld-cinnabar selection:text-white relative overflow-hidden">

@@ -221,13 +221,13 @@ export const AttributeAllocate: React.FC<AttributeAllocateProps> = ({
       </div>
 
       {/* 底部按钮 */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <button
           onClick={() => {
             soundManager.playClick();
             onBack();
           }}
-          className="px-4 py-2.5 rounded-lg border border-underworld-700 text-slate-400 hover:text-slate-200 hover:bg-underworld-900 font-serif text-sm transition-colors"
+          className="w-full rounded-lg border border-underworld-700 px-4 py-2.5 text-center font-serif text-sm text-slate-400 transition-colors hover:bg-underworld-900 hover:text-slate-200 sm:w-auto"
         >
           ← 返回重选命格
         </button>
@@ -237,7 +237,7 @@ export const AttributeAllocate: React.FC<AttributeAllocateProps> = ({
             soundManager.playSealStamp();
             onConfirm();
           }}
-          className="px-7 py-3 rounded-lg font-underworld font-black text-sm tracking-wider bg-gradient-to-r from-red-700 via-underworld-cinnabar to-red-800 text-white hover:brightness-110 shadow-glow-cinnabar hover:scale-105 border border-red-400/60 transition-all flex items-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-400/60 bg-gradient-to-r from-red-700 via-underworld-cinnabar to-red-800 px-7 py-3 font-underworld text-sm font-black tracking-wider text-white shadow-glow-cinnabar transition-all hover:brightness-110 hover:scale-105 sm:w-auto"
         >
           <span>盖下法印 · 步入六道摇号司</span>
           <ArrowRight className="w-4 h-4" />

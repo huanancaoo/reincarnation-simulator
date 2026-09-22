@@ -33,11 +33,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="w-full bg-underworld-950/95 backdrop-blur-md border-b-2 border-underworld-700/60 border-t-2 border-t-underworld-ghost/30 sticky top-0 z-40 px-3 sm:px-6 py-2.5 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <div className="max-w-6xl mx-auto flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         {/* 标题与LOGO：阎罗殿牌匾 */}
         <div
           onClick={onResetToTitle}
-          className="flex items-center gap-2.5 cursor-pointer group select-none"
+          className="flex min-w-0 items-center gap-2.5 cursor-pointer group select-none"
           title="返回地府大厅"
         >
           <div className="relative">
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-underworld font-black text-base sm:text-xl text-slate-100 tracking-widest text-glow-ghost flex items-center">
+              <h1 className="whitespace-nowrap font-underworld font-black text-base sm:text-xl text-slate-100 tracking-widest text-glow-ghost flex items-center">
                 幽冥投胎司
               </h1>
               <span className="seal-stamp text-[10px] py-0 px-1 hidden sm:inline-block">
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* 状态栏：功德值、转世次数、赛博木鱼、弹幕、成就入口、声音 */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
           {/* 功德池与木鱼入口 */}
           <button
             onClick={() => {
