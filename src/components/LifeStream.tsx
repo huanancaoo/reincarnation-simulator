@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { AnimalSpecies, Attributes, BirthLocation, FamilyBackground, InteractiveChoice, Realm, Talent, YearLog } from '../types/game';
+import { AnimalSpecies, Attributes, BirthLocation, FamilyBackground, FateDirective, InteractiveChoice, Realm, Talent, YearLog } from '../types/game';
 import { soundManager } from '../utils/audio';
 import { Play, Pause, SkipForward, ArrowDownCircle, Heart, Brain, Dumbbell, Coins, Sparkles, Clover } from 'lucide-react';
 
@@ -12,6 +12,8 @@ interface LifeStreamProps {
   location: BirthLocation;
   family: FamilyBackground;
   talents: Talent[];
+  fateDirective?: FateDirective;
+  fateDirectiveCompleted: boolean;
   isAutoPlaying: boolean;
   speedMs: number;
   isDead: boolean;
@@ -34,6 +36,8 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
   location,
   family,
   talents,
+  fateDirective,
+  fateDirectiveCompleted,
   isAutoPlaying,
   speedMs,
   isDead,
@@ -47,6 +51,11 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
   onOpenSettlement
 }) => {
   const streamBottomRef = useRef<HTMLDivElement>(null);
+  const fateProgress = fateDirective
+    ? fateDirective.metric === 'age'
+      ? currentAge
+      : attributes[fateDirective.metric]
+    : 0;
 
   // 自动平滑滚动到底部
   useEffect(() => {
@@ -85,6 +94,29 @@ export const LifeStream: React.FC<LifeStreamProps> = ({
             <span className="seal-stamp-ghost text-[9px] py-0 px-1 hidden sm:inline-block">推演中</span>
           </div>
         </div>
+
+        {fateDirective && (
+          <div className={`mb-2.5 rounded-lg border p-2.5 font-serif ${
+            fateDirectiveCompleted
+              ? 'border-emerald-500/50 bg-emerald-950/30'
+              : 'border-underworld-gold/40 bg-underworld-950/80'
+          }`}>
+            <div className="flex items-center justify-between gap-2 text-[11px]">
+              <span className="font-bold text-underworld-gold flex items-center gap-1">
+                <span>{fateDirective.icon}</span>
+                <span>天命敕令 · {fateDirective.title}</span>
+              </span>
+              <span className={fateDirectiveCompleted ? 'text-emerald-300' : 'text-underworld-parchment'}>
+                {fateDirectiveCompleted ? '敕令已成' : `功德 +${fateDirective.karmaReward}`}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{fateDirective.description}</p>
+            <div className="mt-2 flex items-center justify-between text-[10px]">
+              <span className="text-slate-500">{formatFateMetric(fateDirective.metric)}</span>
+              <span className="font-mono font-bold text-underworld-ghost">{Math.min(fateProgress, fateDirective.target)} / {fateDirective.target}</span>
+            </div>
+          </div>
+        )}
 
         {/* 携带天赋神符徽章 */}
         {talents.length > 0 && (
@@ -370,6 +402,19 @@ function AttributeWidget({ icon, label, value }: { icon: React.ReactNode; label:
       <span className="font-mono font-bold text-xs text-underworld-ghost mt-0.5">{value}</span>
     </div>
   );
+}
+
+function formatFateMetric(metric: FateDirective['metric']) {
+  const labels: Record<FateDirective['metric'], string> = {
+    age: '阳寿刻度',
+    beauty: '骨相皮囊',
+    intelligence: '宿慧悟性',
+    strength: '气血根骨',
+    money: '宿世福禄',
+    karma: '阴骘功德',
+    luck: '天地命数'
+  };
+  return labels[metric];
 }
 
 function formatStatName(key: string): string {

@@ -4,7 +4,7 @@ import { TALENTS_POOL } from '../../data/talents';
 import { BIRTH_LOCATIONS, FAMILY_BACKGROUNDS, getLocationsByRealm, getFamiliesByRealm } from '../../data/locations';
 import { ANIMAL_SPECIES } from '../../data/animals';
 import { LIFE_EVENTS } from '../../data/events';
-import { Attributes, InteractiveChoice, Talent } from '../../types/game';
+import { Attributes, FateDirective, InteractiveChoice, Talent } from '../../types/game';
 
 describe('LifeSimulatorEngine', () => {
   it('should draw 10 unique talents from pool', () => {
@@ -109,6 +109,39 @@ describe('LifeSimulatorEngine', () => {
 
     expect(result.log.text).toContain('平平淡淡，安然度过了一岁春秋');
     expect(result.log.isMilestone).toBe(false);
+  });
+
+  it('should reward a completed fate directive at settlement', () => {
+    const directive: FateDirective = {
+      id: 'test_wisdom',
+      title: '文曲高照',
+      description: '测试用天命敕令',
+      icon: '📚',
+      metric: 'intelligence',
+      target: 16,
+      karmaReward: 18
+    };
+    const stats: Attributes = {
+      beauty: 5,
+      intelligence: 16,
+      strength: 5,
+      money: 5,
+      karma: 5,
+      luck: 5
+    };
+
+    expect(LifeSimulatorEngine.isFateDirectiveComplete(directive, 30, stats)).toBe(true);
+    expect(LifeSimulatorEngine.createFateDirectiveCompletionLog(directive, 30).isMilestone).toBe(true);
+
+    const ordinaryRecord = LifeSimulatorEngine.calculateSettlement(
+      30, '测试终局', stats, [], BIRTH_LOCATIONS[0], FAMILY_BACKGROUNDS[0], [], 'human'
+    );
+    const rewardedRecord = LifeSimulatorEngine.calculateSettlement(
+      30, '测试终局', stats, [], BIRTH_LOCATIONS[0], FAMILY_BACKGROUNDS[0], [], 'human', undefined, directive, true
+    );
+
+    expect(rewardedRecord.karmaEarned).toBe(ordinaryRecord.karmaEarned + directive.karmaReward);
+    expect(rewardedRecord.fateDirectiveCompleted).toBe(true);
   });
 
   it('should support animal realm simulation and lifespan check', () => {

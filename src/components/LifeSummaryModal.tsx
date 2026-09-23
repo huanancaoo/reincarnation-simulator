@@ -36,7 +36,10 @@ export const LifeSummaryModal: React.FC<LifeSummaryModalProps> = ({
 
   const handleShare = () => {
     soundManager.playClick();
-    const shareText = `【投胎模拟器·生平纪要】\n我在【${record.location.name}】投胎出生于【${record.family.title}】。\n享年：${record.finalAge} 岁\n死因：${record.deathReason}\n综合评级：${record.rating}（总分 ${record.score}）\n获得功德：+${record.karmaEarned}\n墓志铭：${record.epitaph}\n来测测你能活几岁？`;
+    const fateDirectiveText = record.fateDirective
+      ? `\n天命敕令：${record.fateDirective.icon} ${record.fateDirective.title}（${record.fateDirectiveCompleted ? '已达成' : '未达成'}）`
+      : '';
+    const shareText = `【投胎模拟器·生平纪要】\n我在【${record.location.name}】投胎出生于【${record.family.title}】。\n享年：${record.finalAge} 岁\n死因：${record.deathReason}\n综合评级：${record.rating}（总分 ${record.score}）${fateDirectiveText}\n获得功德：+${record.karmaEarned}\n墓志铭：${record.epitaph}\n来测测你能活几岁？`;
     navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -117,6 +120,25 @@ export const LifeSummaryModal: React.FC<LifeSummaryModalProps> = ({
             </div>
           </div>
         </div>
+
+        {record.fateDirective && (
+          <div className={`mb-5 p-3 rounded-xl border font-serif ${
+            record.fateDirectiveCompleted
+              ? 'bg-emerald-950/30 border-emerald-500/50'
+              : 'bg-underworld-950/70 border-underworld-800'
+          }`}>
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="font-bold text-underworld-gold flex items-center gap-1.5">
+                <span>{record.fateDirective.icon}</span>
+                <span>天命敕令 · {record.fateDirective.title}</span>
+              </span>
+              <span className={record.fateDirectiveCompleted ? 'text-emerald-300' : 'text-slate-500'}>
+                {record.fateDirectiveCompleted ? `达成 · +${record.fateDirective.karmaReward} 功德` : '未能达成'}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{record.fateDirective.description}</p>
+          </div>
+        )}
 
         {/* 终老死因 */}
         <div className="p-3 rounded-xl bg-red-950/30 border border-red-500/40 mb-5">

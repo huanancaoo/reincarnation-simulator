@@ -120,6 +120,18 @@ export interface YearLog {
   };
 }
 
+export type FateDirectiveMetric = AttributeKey | 'age';
+
+export interface FateDirective {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  metric: FateDirectiveMetric;
+  target: number;
+  karmaReward: number;
+}
+
 export interface Achievement {
   id: string;
   title: string;
@@ -154,6 +166,8 @@ export interface GameRecord {
   epitaph: string;
   achievementsUnlocked: string[];
   karmaEarned: number;
+  fateDirective?: FateDirective;
+  fateDirectiveCompleted?: boolean;
 }
 
 export interface PlayerProfile {

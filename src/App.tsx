@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { AnimalSpecies, Attributes, BirthLocation, FamilyBackground, GamePhase, GameRecord, InteractiveChoice, PlayerProfile, Realm, Talent, YearLog } from './types/game';
+import { AnimalSpecies, Attributes, BirthLocation, FamilyBackground, FateDirective, GamePhase, GameRecord, InteractiveChoice, PlayerProfile, Realm, Talent, YearLog } from './types/game';
 import { TALENTS_POOL } from './data/talents';
 import {
   ALL_BIRTH_LOCATIONS,
@@ -65,6 +65,8 @@ export const App: React.FC = () => {
   const [historyEventIds, setHistoryEventIds] = useState<Set<string>>(new Set());
   const [unlockedThisRun, setUnlockedThisRun] = useState<string[]>([]);
   const [pendingChoice, setPendingChoice] = useState<InteractiveChoice | undefined>(undefined);
+  const [fateDirective, setFateDirective] = useState<FateDirective | undefined>(undefined);
+  const [fateDirectiveCompleted, setFateDirectiveCompleted] = useState(false);
 
   // 播放控制与特色工具
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
@@ -97,6 +99,8 @@ export const App: React.FC = () => {
     });
     setAvailablePoints(0);
     setPendingChoice(undefined);
+    setFateDirective(undefined);
+    setFateDirectiveCompleted(false);
     setPhase('talent_selection');
   };
 
@@ -164,9 +168,22 @@ export const App: React.FC = () => {
     storage.saveProfile(updated);
   };
 
+  const getFateDirectiveCompletionLog = (age: number, stats: Attributes) => {
+    if (
+      !fateDirective
+      || fateDirectiveCompleted
+      || !LifeSimulatorEngine.isFateDirectiveComplete(fateDirective, age, stats)
+    ) {
+      return undefined;
+    }
+
+    return LifeSimulatorEngine.createFateDirectiveCompletionLog(fateDirective, age);
+  };
+
   // 开启人生演化
   const handleStartLife = () => {
     const initialStats = calculateFinalStats();
+    const newFateDirective = LifeSimulatorEngine.drawFateDirective(realm);
     setCurrentStats(initialStats);
     setCurrentAge(0);
     setIsDead(false);
@@ -190,8 +207,18 @@ export const App: React.FC = () => {
       realm === 'animal' ? currentAnimal : undefined
     );
 
-    setLogs([res.log]);
+    const directiveCompleted = LifeSimulatorEngine.isFateDirectiveComplete(newFateDirective, 0, res.newStats);
+    const directiveLog = directiveCompleted
+      ? LifeSimulatorEngine.createFateDirectiveCompletionLog(newFateDirective, 0)
+      : undefined;
+
+    setFateDirective(newFateDirective);
+    setFateDirectiveCompleted(directiveCompleted);
+    setLogs(directiveLog ? [res.log, directiveLog] : [res.log]);
     setCurrentStats(res.newStats);
+    if (directiveCompleted) {
+      soundManager.playAchievementUnlock();
+    }
     if (res.pendingChoice) {
       setPendingChoice(res.pendingChoice);
       setIsAutoPlaying(false);
@@ -222,11 +249,17 @@ export const App: React.FC = () => {
       realm,
       realm === 'animal' ? currentAnimal : undefined
     );
+    const directiveLog = getFateDirectiveCompletionLog(nextAge, res.newStats);
 
     setCurrentAge(nextAge);
     setCurrentStats(res.newStats);
-    setLogs((prev) => [...prev, res.log]);
+    setLogs((prev) => directiveLog ? [...prev, res.log, directiveLog] : [...prev, res.log]);
     setHistoryEventIds(historySet);
+
+    if (directiveLog) {
+      setFateDirectiveCompleted(true);
+      soundManager.playAchievementUnlock();
+    }
 
     if (res.achievementId && !unlockedThisRun.includes(res.achievementId)) {
       setUnlockedThisRun((prev) => [...prev, res.achievementId!]);
@@ -258,7 +291,9 @@ export const App: React.FC = () => {
           ? Array.from(new Set([...unlockedThisRun, res.achievementId]))
           : unlockedThisRun,
         realm,
-        realm === 'animal' ? currentAnimal : undefined
+        realm === 'animal' ? currentAnimal : undefined,
+        fateDirective,
+        fateDirectiveCompleted || Boolean(directiveLog)
       );
 
       setCurrentRecord(record);
@@ -277,10 +312,16 @@ export const App: React.FC = () => {
       currentStats,
       currentAge
     );
+    const directiveLog = getFateDirectiveCompletionLog(currentAge, res.newStats);
 
-    setLogs((prev) => [...prev, res.log]);
+    setLogs((prev) => directiveLog ? [...prev, res.log, directiveLog] : [...prev, res.log]);
     setCurrentStats(res.newStats);
     setPendingChoice(undefined);
+
+    if (directiveLog) {
+      setFateDirectiveCompleted(true);
+      soundManager.playAchievementUnlock();
+    }
 
     if (res.achievementId && !unlockedThisRun.includes(res.achievementId)) {
       setUnlockedThisRun((prev) => [...prev, res.achievementId!]);
@@ -304,7 +345,9 @@ export const App: React.FC = () => {
           ? Array.from(new Set([...unlockedThisRun, res.achievementId]))
           : unlockedThisRun,
         realm,
-        realm === 'animal' ? currentAnimal : undefined
+        realm === 'animal' ? currentAnimal : undefined,
+        fateDirective,
+        fateDirectiveCompleted || Boolean(directiveLog)
       );
 
       setCurrentRecord(record);
@@ -328,12 +371,26 @@ export const App: React.FC = () => {
     const newLogs: YearLog[] = [];
     const historySet = new Set(historyEventIds);
     const achievements = [...unlockedThisRun];
+    let directiveCompleted = fateDirectiveCompleted;
+    const completeDirectiveIfEligible = (ageToCheck: number, statsToCheck: Attributes) => {
+      if (
+        !fateDirective
+        || directiveCompleted
+        || !LifeSimulatorEngine.isFateDirectiveComplete(fateDirective, ageToCheck, statsToCheck)
+      ) {
+        return;
+      }
+
+      directiveCompleted = true;
+      newLogs.push(LifeSimulatorEngine.createFateDirectiveCompletionLog(fateDirective, ageToCheck));
+    };
 
     // 若当前有未决的选项，先默认选择第一项
     if (pendingChoice) {
       const choiceRes = LifeSimulatorEngine.resolveChoice(pendingChoice, 0, stats, age);
       stats = choiceRes.newStats;
       newLogs.push(choiceRes.log);
+      completeDirectiveIfEligible(age, stats);
       setPendingChoice(undefined);
       if (choiceRes.isDead) {
         dead = true;
@@ -362,12 +419,15 @@ export const App: React.FC = () => {
         const choiceRes = LifeSimulatorEngine.resolveChoice(res.pendingChoice, 0, stats, age);
         stats = choiceRes.newStats;
         newLogs.push(choiceRes.log);
+        completeDirectiveIfEligible(age, stats);
         if (choiceRes.isDead) {
           dead = true;
           reason = choiceRes.deathReason || '抉择离世';
           break;
         }
       }
+
+      completeDirectiveIfEligible(age, stats);
 
       if (res.achievementId && !achievements.includes(res.achievementId)) {
         achievements.push(res.achievementId);
@@ -392,6 +452,10 @@ export const App: React.FC = () => {
     setIsDead(true);
     setDeathReason(reason);
     setUnlockedThisRun(achievements);
+    setFateDirectiveCompleted(directiveCompleted);
+    if (directiveCompleted && !fateDirectiveCompleted) {
+      soundManager.playAchievementUnlock();
+    }
     if (achievements.length > unlockedThisRun.length) {
       soundManager.playAchievementUnlock();
     }
@@ -406,7 +470,9 @@ export const App: React.FC = () => {
       currentFamily,
       achievements,
       realm,
-      realm === 'animal' ? currentAnimal : undefined
+      realm === 'animal' ? currentAnimal : undefined,
+      fateDirective,
+      directiveCompleted
     );
 
     setCurrentRecord(record);
@@ -646,6 +712,8 @@ export const App: React.FC = () => {
             location={currentLocation}
             family={currentFamily}
             talents={selectedTalents}
+            fateDirective={fateDirective}
+            fateDirectiveCompleted={fateDirectiveCompleted}
             isAutoPlaying={isAutoPlaying}
             speedMs={speedMs}
             isDead={isDead}

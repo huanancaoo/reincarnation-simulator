@@ -3,6 +3,7 @@ import {
   Attributes,
   BirthLocation,
   FamilyBackground,
+  FateDirective,
   GameRecord,
   InteractiveChoice,
   LifeEvent,
@@ -142,6 +143,43 @@ export class LifeSimulatorEngine {
     });
 
     return finalStats;
+  }
+
+  static drawFateDirective(realm: Realm): FateDirective {
+    const directives: Record<Realm, FateDirective[]> = {
+      human: [
+        { id: 'human_wisdom', title: '文曲高照', description: '将宿慧悟性修至 16，叩开仕途与学问之门。', icon: '📚', metric: 'intelligence', target: 16, karmaReward: 18 },
+        { id: 'human_prosperity', title: '福禄盈门', description: '将宿世福禄修至 16，攒下安身立命的家业。', icon: '💰', metric: 'money', target: 16, karmaReward: 18 },
+        { id: 'human_virtue', title: '阴德护身', description: '将阴骘功德修至 14，为来世积下一份福报。', icon: '☯️', metric: 'karma', target: 14, karmaReward: 18 },
+        { id: 'human_longevity', title: '松鹤延年', description: '平安走到 65 岁，阅尽红尘起落。', icon: '🏮', metric: 'age', target: 65, karmaReward: 18 }
+      ],
+      animal: [
+        { id: 'animal_vitality', title: '百兽之勇', description: '将气血根骨修至 12，在弱肉强食中守住本命。', icon: '🐾', metric: 'strength', target: 12, karmaReward: 18 },
+        { id: 'animal_luck', title: '灵兽机缘', description: '将天地命数修至 10，逢凶化吉，得享天命。', icon: '🍀', metric: 'luck', target: 10, karmaReward: 18 },
+        { id: 'animal_virtue', title: '万灵有情', description: '将阴骘功德修至 10，修得一份众生善缘。', icon: '🌿', metric: 'karma', target: 10, karmaReward: 18 }
+      ],
+      fantasy: [
+        { id: 'fantasy_cultivation', title: '筑基问道', description: '将气血根骨修至 18，承受破境时的天雷淬体。', icon: '⚡', metric: 'strength', target: 18, karmaReward: 24 },
+        { id: 'fantasy_insight', title: '参悟玄机', description: '将宿慧悟性修至 18，于万卷道藏中觅得真意。', icon: '🪷', metric: 'intelligence', target: 18, karmaReward: 24 },
+        { id: 'fantasy_merit', title: '护佑苍生', description: '将阴骘功德修至 15，以一世修为换一方安宁。', icon: '✨', metric: 'karma', target: 15, karmaReward: 24 }
+      ]
+    };
+    const pool = directives[realm];
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  static isFateDirectiveComplete(directive: FateDirective, age: number, stats: Attributes): boolean {
+    return directive.metric === 'age'
+      ? age >= directive.target
+      : stats[directive.metric] >= directive.target;
+  }
+
+  static createFateDirectiveCompletionLog(directive: FateDirective, age: number): YearLog {
+    return {
+      age,
+      text: `${age} 岁：天命敕令「${directive.title}」达成，今生结算额外赐予 ${directive.karmaReward} 点功德。`,
+      isMilestone: true
+    };
   }
 
   /**
@@ -430,7 +468,9 @@ export class LifeSimulatorEngine {
     family: FamilyBackground,
     unlockedAchievements: string[],
     realm: Realm = 'human',
-    animalSpecies?: AnimalSpecies
+    animalSpecies?: AnimalSpecies,
+    fateDirective?: FateDirective,
+    fateDirectiveCompleted: boolean = false
   ): GameRecord {
     // 综合评分计算公式
     const statSum =
@@ -456,7 +496,8 @@ export class LifeSimulatorEngine {
     else rating = 'D';
 
     // 功德获取结算（评分 + 寿命 + 成就奖励）
-    const karmaEarned = Math.max(10, Math.round(score / 5) + Math.round(finalStats.karma * 2));
+    const karmaEarned = Math.max(10, Math.round(score / 5) + Math.round(finalStats.karma * 2))
+      + (fateDirectiveCompleted && fateDirective ? fateDirective.karmaReward : 0);
 
     // 生成个性化墓志铭
     const epitaph = this.generateEpitaph(finalAge, deathReason, rating, finalStats, realm, animalSpecies);
@@ -476,7 +517,9 @@ export class LifeSimulatorEngine {
       rating,
       epitaph,
       achievementsUnlocked: unlockedAchievements,
-      karmaEarned
+      karmaEarned,
+      fateDirective,
+      fateDirectiveCompleted
     };
   }
 
